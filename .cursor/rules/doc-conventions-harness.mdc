@@ -1,0 +1,18 @@
+---
+description: Operational doc/ — конвенции из .ai и каталог модулей в репозитории
+alwaysApply: true
+---
+
+# Документация `doc/` (DeepSeek Harness)
+
+Перед созданием, переносом или массовой правкой `.md` в `doc/`:
+
+1. **Read** `.ai/prompts/doc_conventions.md` — шаблон путей и запреты.
+2. **Read** `doc/platform/services-catalog.md` — конкретные `doc_module` для **этого** репозитория.
+3. Индекс operational doc: `doc/README.md`. Wikilinks: `doc/OBSIDIAN.md`.
+
+**Не путать:** upstream Harness — каталог `docs/` (не переносить в `doc/`).
+
+**Запрещено:** `doc/<task_name>/` в корне `doc/` без `doc_module`.
+
+Конвенции в субмодуле — универсальные; имена сервисов и runbook'и — только в `doc/` корня репозитория.
