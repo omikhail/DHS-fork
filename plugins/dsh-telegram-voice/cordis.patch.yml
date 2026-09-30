@@ -1,0 +1,7 @@
+- insert:
+    - id: telegram-voice
+      name: "@mikhail/dsh-telegram-voice"
+      config:
+        baseURL: http://localhost:9000
+        language: ru
+        timeoutMs: 30000

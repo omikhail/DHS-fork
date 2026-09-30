@@ -1,0 +1,24 @@
+{
+  "name": "@mikhail/dsh-telegram-voice",
+  "version": "0.1.0",
+  "description": "Voice-to-text (STT) provider for dsh-telegram via Whisper ASR",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  }
+}

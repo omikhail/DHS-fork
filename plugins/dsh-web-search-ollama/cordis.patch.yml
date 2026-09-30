@@ -1,0 +1,8 @@
+- insert:
+    - id: web-search-ollama
+      name: '@mikhail/dsh-web-search-ollama'
+      inject:
+        - web
+      config:
+        apiKeyEnv: OLLAMA_API_KEY
+        baseURL: https://ollama.com
