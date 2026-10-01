@@ -23,7 +23,7 @@
 
 Runbook модуля: `doc/<doc_module>/runbook.md` или `doc/<doc_module>/README.md`.
 
-Выкат Web UI (этот форк): [[repo/doc/deploy/DEPLOY_DSH_WEB]]. Ollama lease (локально): [[repo/doc/plugins/dsh-ollama-redis-lease/runbook-local]].
+Выкат Web UI (этот форк): [[repo/doc/deploy/DEPLOY_DSH_WEB]]. Ollama lease (локально): [[repo/doc/plugins/dsh-ollama-redis-lease/runbook-local]]. MAX userbot (ТЗ): [[repo/doc/plugins/dsh-max-userbot/tz]].
 
 ## Конвенции и промпты
 

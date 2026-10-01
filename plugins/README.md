@@ -10,6 +10,7 @@ Runnable code for each package lives in `plugins/<name>/lib/` and is **committed
 | `@mikhail/dsh-telegram-voice` | `dsh-telegram-voice/` | Whisper STT for Telegram voice messages |
 | `@mikhail/dsh-web-search-ollama` | `dsh-web-search-ollama/` | Ollama Cloud `ctx.web` search provider |
 | `@mikhail/dsh-ollama-redis-lease` | `dsh-ollama-redis-lease/` | HTTP Ollama key lease via Spyder (`ctx.credentials` + `llm/stream`) |
+| `@mikhail/dsh-max-userbot` | `dsh-max-userbot/` | MAX userbot front (planned); TZ in `doc/plugins/dsh-max-userbot/tz.md` |
 
 Operational doc index: [[repo/doc/platform/services-catalog]].
 

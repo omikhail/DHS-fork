@@ -11,7 +11,7 @@
 | `core` | `doc/core/` | Session log, agent loop, tools, system prompt (`packages/core/`) |
 | `capability` | `doc/capability/` | Capability seams: llm, shell, fs, web, session, … (см. [[repo/docs/capability-seams]]) |
 | `deploy` | `doc/deploy/` | Выкат, systemd, хосты, скрипты деплоя (`doc/deploy/DEPLOY_*.md`) |
-| `plugins` | `doc/plugins/` | Out-of-tree Cordis-плагины; **исходники** — `plugins/` (`@mikhail/dsh-telegram`, voice, `dsh-web-search-ollama`, `dsh-ollama-redis-lease`); индекс doc: [[repo/doc/plugins/dsh-ollama-redis-lease/README]] |
+| `plugins` | `doc/plugins/` | Out-of-tree Cordis-плагины; **исходники** — `plugins/` (`@mikhail/dsh-telegram`, voice, web-search-ollama, ollama-redis-lease, **dsh-max-userbot** — в разработке); doc: [[repo/doc/plugins/dsh-ollama-redis-lease/README]], [[repo/doc/plugins/dsh-max-userbot/README]] |
 | `observability` | `doc/observability/` | Алерты, логи, метрики, on-call runbooks |
 | `sdk` | `doc/sdk/` | JSON-RPC SDK, ACP, внешние интеграции (`packages/sdk/`, `packages/acp/`) |
 
