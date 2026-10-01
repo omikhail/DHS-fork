@@ -1,0 +1,7 @@
+- insert:
+    - id: max-voice
+      name: "@mikhail/dsh-max-voice"
+      config:
+        baseURL: http://localhost:9000
+        language: ru
+        timeoutMs: 30000

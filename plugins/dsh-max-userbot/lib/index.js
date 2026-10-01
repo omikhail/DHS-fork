@@ -276,6 +276,8 @@ async function start(ctx, config, logger, signal, status, secrets) {
         })
         : undefined;
 
+    const stt = ctx.get('maxStt');
+
     const router = new MaxUpdateRouter({
         access,
         runner,
@@ -283,6 +285,12 @@ async function start(ctx, config, logger, signal, status, secrets) {
         replyContext,
         redact: secrets.redactor(),
         models,
+        stt,
+        voice: {
+            maxBytes: config.voice.maxBytes,
+            downloadTimeoutMs: config.voice.downloadTimeoutMs,
+            mimeType: config.voice.mimeType,
+        },
         workspace: {
             current: cwdFor,
             resolve: (input, current) => resolveDirectory(input, current, homedir()),

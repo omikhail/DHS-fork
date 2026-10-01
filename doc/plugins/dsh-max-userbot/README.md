@@ -18,6 +18,13 @@
 - [[repo/doc/plugins/dsh-max-userbot/runbook-local]] — QR, credentials, smoke
 - [[repo/doc/plugins/dsh-max-userbot/final-review-report]] — Phase 3 final review (v1)
 
+## Связанные задачи
+
+- [[repo/doc/plugins/max-voice-stt/research]] — голосовые в MAX (STT), research
+- [[repo/doc/plugins/max-voice-stt/design]] — design + ADR
+- [[repo/doc/plugins/max-voice-stt/plan-mode-prompt]] — handoff Plan Mode
+- [[repo/doc/plugins/max-voice-stt/final-review-report]] — Phase 3 review (voice STT)
+
 ## Код (после реализации)
 
 - Пакет: `plugins/dsh-max-userbot/` (порт из `features/max-userbot/`)

@@ -1,5 +1,6 @@
 import { COMMANDS, helpText, parseCommand } from './commands.js';
 import { SILENT_LOGGER } from './harness/types.js';
+import { processVoiceMessage } from './voice/pipeline.js';
 
 function statusLines(rows) {
     return rows.map((row) => `${row.label}: ${row.value}`).join('\n');
@@ -25,7 +26,7 @@ export class MaxUpdateRouter {
                 return;
             const text = item.text?.trim() ?? '';
             if (item.messageType === 'voice') {
-                return await this.say(item, 'Голосовые сообщения пока не обрабатываются.');
+                return await this.handleVoice(item, target);
             }
             if (item.messageType === 'other' && !text) {
                 return await this.say(item, 'Пока поддерживается только текст.');
@@ -46,6 +47,19 @@ export class MaxUpdateRouter {
 
     async say(item, text) {
         await this.options.chat.reply(item, text);
+    }
+
+    async handleVoice(item, target) {
+        const result = await processVoiceMessage({
+            item,
+            stt: this.options.stt,
+            limits: this.options.voice,
+            logger: this.logger,
+        });
+        if (result.kind === 'reply') {
+            return await this.say(item, result.text);
+        }
+        return await this.runPrompt(item, target, result.parts);
     }
 
     async onCommand(item, target, fromId, name, args) {

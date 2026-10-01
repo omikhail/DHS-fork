@@ -1,0 +1,28 @@
+{
+  "name": "@mikhail/dsh-max-voice",
+  "version": "0.1.0",
+  "description": "Voice-to-text (STT) provider for dsh-max-userbot via Whisper ASR",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=lib/**/*.js test/*.test.js"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  }
+}

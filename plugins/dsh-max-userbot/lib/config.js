@@ -36,4 +36,15 @@ export const Config = Schema.object({
             .default(4000)
             .description('Maximum characters per outbound MAX message; longer replies are chunked.'),
     }),
+    voice: Schema.object({
+        maxBytes: Schema.natural()
+            .default(20_000_000)
+            .description('Maximum voice download size in bytes before transcription.'),
+        downloadTimeoutMs: Schema.natural()
+            .default(60_000)
+            .description('Timeout for downloading voiceUrl in milliseconds.'),
+        mimeType: Schema.string()
+            .default('audio/ogg')
+            .description('MIME type sent to Whisper for MAX voice bytes.'),
+    }),
 });

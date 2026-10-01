@@ -8,7 +8,7 @@ task_name: dsh-max-userbot
 
 # Runbook: `@mikhail/dsh-max-userbot` (local / dev)
 
-SSOT: [[repo/doc/plugins/dsh-max-userbot/tz]], [[repo/doc/plugins/dsh-max-userbot/design]].
+SSOT: [[repo/doc/plugins/dsh-max-userbot/tz]], [[repo/doc/plugins/dsh-max-userbot/design]], [[repo/doc/plugins/max-voice-stt/design]].
 
 ## Prerequisites
 
@@ -37,11 +37,17 @@ Record in `~/.dsh/.credentials.yaml`:
 
 ## 3. Profile wiring
 
-`~/.dsh/profiles/web/package.json` — `file:` dependency on `plugins/dsh-max-userbot`.
+`~/.dsh/profiles/web/package.json` — `file:` dependency on `plugins/dsh-max-userbot` and (for voice) `plugins/dsh-max-voice`.
 
 Bundle patch (example config):
 
 ```yaml
+- id: max-voice
+  name: '@mikhail/dsh-max-voice'
+  config:
+    baseURL: http://localhost:9000
+    language: ru
+    timeoutMs: 30000
 - id: max-userbot
   name: '@mikhail/dsh-max-userbot'
   config:
@@ -53,6 +59,10 @@ Bundle patch (example config):
     allowFrom: []
     reply:
       maxChars: 4000
+    voice:
+      maxBytes: 20000000
+      downloadTimeoutMs: 60000
+      mimeType: audio/ogg
 ```
 
 `pnpm install` in the profile directory, then restart DSH.
@@ -64,6 +74,16 @@ Bundle patch (example config):
 3. Text prompt → agent reply in chat
 4. `/new` → new harness session (check `bindings.json`)
 5. Web UI and Telegram still work (regression)
+
+### Voice (Whisper STT)
+
+Prerequisite: Whisper ASR on `http://localhost:9000` (same as `@mikhail/dsh-telegram-voice` in the profile).
+
+1. Load `@mikhail/dsh-max-voice` **before** `@mikhail/dsh-max-userbot` in the bundle (see §3).
+2. Send a voice message in MAX from an allowed phone → agent reply; session user text includes `🎤` prefix.
+3. Stop Whisper → next voice message → `⚠️ Расшифровка голоса недоступна.` (DSH keeps running).
+
+Design: [[repo/doc/plugins/max-voice-stt/design]].
 
 ## 5. State on disk
 
