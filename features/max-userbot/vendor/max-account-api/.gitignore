@@ -1,0 +1,21 @@
+node_modules
+dist
+
+# Session files (contain LOGIN tokens — never commit)
+.max-session*.json
+
+# Reverse-engineering / capture tools — not part of the published library
+capture-rt/
+
+# Personal publishing instructions — author-only
+docs/PUBLISHING.md
+
+# Local editor / IDE / OS / npm artifacts
+*.log
+.DS_Store
+*.tgz
+.env
+.env.*
+.claude/settings.local.json
+.vscode/
+.idea/

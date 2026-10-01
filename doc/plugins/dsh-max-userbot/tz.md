@@ -5,14 +5,14 @@ type: tz
 doc_module: plugins
 task_name: dsh-max-userbot
 status: active
-tags: [dsh, max, userbot, messenger, plugin, cordis, telegram-parity, profsalon]
+tags: [dsh, max, userbot, messenger, plugin, cordis, telegram-parity]
 ---
 
 # ТЗ: `@mikhail/dsh-max-userbot`
 
 Cordis-плагин для **DeepSeek Harness**: третий **канал общения** с агентом (наряду с **Web UI** и **Telegram**). Плагин держит **userbot-сессию MAX** (WebSocket, неофициальный `max-account-api`), принимает входящие сообщения, будит harness-агента и отправляет ответы в тот же чат.
 
-Код планируется в `plugins/dsh-max-userbot/` форка; подключение — `file:` в `~/.dsh/profiles/web` (и при необходимости `headless`). Исследование и reference-исходники n8n: проект Spyder, `doc/n8n/ProfSalon/max-userbot-dsh/` (копия `reference-code/`, README с архитектурой).
+Целевой код плагина: `plugins/dsh-max-userbot/`. Переиспользуемый транспорт уже в репозитории: **`features/max-userbot/`** (см. [[repo/features/max-userbot/README]]). Подключение плагина — `file:` в `~/.dsh/profiles/web` (и при необходимости `headless`).
 
 ---
 
@@ -30,24 +30,24 @@ Cordis-плагин для **DeepSeek Harness**: третий **канал об�
 
 ## 2. Проблема
 
-- Пользователи ProfSalon / «Джонни» уже общаются в MAX; ответы сейчас идут через **n8n** (рабочая нода на spyder-9), а не через единый DSH-стек.
-- Дублирование логики: n8n workflow vs harness agent-loop, разные сессии и инструменты.
-- Нет единого места для skills, web_search, lease-ключей Ollama и session log в MAX.
+- Агент доступен в Web и Telegram, но **нет** такого же harness-канала в MAX.
+- Отдельные скрипты или внешние автоматизации не дают единый session log, tools, skills и LLM-конфиг профиля DSH.
+- Транспорт MAX userbot уже отлажен (Node.js, тот же стек, что и DSH-плагины); его нужно **встроить** в Cordis, а не дублировать с нуля.
 
 ## 3. Цель
 
-- **Вход:** входящее сообщение MAX (текст; голос — через STT) → нормализованный payload → **budить агента** через `ctx.agents` (паттерн как у `dsh-telegram`).
+- **Вход:** входящее сообщение MAX (текст; голос — через STT) → нормализованный payload → **будить агента** через `ctx.agents` (паттерн как у `dsh-telegram`).
 - **Выход:** ответ агента → `reply` в тот же тред / `sendMessage` по `chatId`.
 - **Сессии:** привязка `chatId` (и при необходимости `fromId`) к harness session id с сохранением на диске (аналог bindings в telegram).
 - **Креды:** `deviceId` + `loginToken` только через `ctx.credentials`, не в `cordis.patch.yml` литералами.
-- **Транспорт:** переиспользовать проверенный слой из n8n reference (`MaxClientManager`, `normalizeMessage`, форк `max-account-api` **appVersion 26.32.1**).
+- **Транспорт:** порт из `features/max-userbot/` — `MaxClientManager`, `normalizeMessage`, форк `max-account-api` **appVersion 26.32.1**.
 
 ## 4. Не в scope (v1)
 
 - Официальный MAX Bot API (если появится) — только userbot.
 - Публикация плагина в npm / upstream DeepSeek Harness.
 - Полный паритет с `dsh-telegram`: streaming edit сообщений, `/sessions`, media OCR/vision, approvals и `ask_user_question` в MAX UI (отдельные задачи v2).
-- Общая сессия MAX с n8n на spyder-9 (**новая** QR/phone-сессия для DSH).
+- Повторное использование **той же** QR-сессии, что уже занята другим процессом (**отдельная** сессия для инстанса DSH).
 - Изменения `packages/core/agent-loop`, `packages/agents` upstream.
 - Групповые админ-команды, рассылки, спам-защита beyond простого allowlist.
 
@@ -56,10 +56,10 @@ Cordis-плагин для **DeepSeek Harness**: третий **канал об�
 | Источник | Что брать |
 |----------|-----------|
 | `plugins/dsh-telegram` | `inject: agents, credentials`; `createAgentHost` / session runner; binding store; fail loud при старте |
-| Spyder `max-userbot-dsh/reference-code` | `helpers/normalizeMessage.ts`, `transport/MaxClientManager.ts`, `vendor/max-account-api/` (форк) |
+| `features/max-userbot/` | `helpers/normalizeMessage.ts`, `transport/MaxClientManager.ts`, `vendor/max-account-api/` |
 | `plugins/dsh-telegram-voice` | Паттерн `ctx.provide('…Stt')` + Whisper HTTP (для MAX — **`maxStt`** или общий STT-сервис v2) |
 
-n8n-файлы `MaxUserbotTrigger.node.ts` / `MaxUserbot.node.ts` — **не** копировать; заменить на `apply(ctx, config)` DSH.
+Обвязку чужого workflow-runtime **не** переносить — только транспорт и нормализацию; точка входа DSH — `apply(ctx, config)`.
 
 ## 6. Архитектура плагина
 
@@ -70,13 +70,15 @@ plugins/dsh-max-userbot/
 ├── lib/
 │   ├── index.js              # apply: lifecycle, router → agent
 │   ├── config.js             # schemastery Config
-│   ├── harness/              # host, message (по образу telegram, без копипасты 1:1 если вынести общее позже)
+│   ├── harness/              # host, message (по образу telegram)
 │   ├── session/              # bindings, runner (упрощённый v1)
-│   ├── transport/            # MaxClientManager (из reference, ESM)
-│   ├── normalizeMessage.js   # из reference
-│   └── vendor/max-account-api/   # форк, сборка dist при необходимости
-└── test/                     # unit: normalize, manager (mock client)
+│   ├── transport/            # из features/max-userbot (ESM)
+│   ├── normalizeMessage.js
+│   └── vendor/max-account-api/
+└── test/                     # unit + перенос тестов из features/max-userbot/__tests__
 ```
+
+Исходник до порта: [[repo/features/max-userbot/README]].
 
 ### Cordis
 
@@ -89,7 +91,7 @@ plugins/dsh-max-userbot/
         - credentials
 ```
 
-Опционально `inject: credentials` только; интерактивные seams (`userQuestions`, `approvals`) — через `ctx.inject()` внутри `apply`, как в telegram, если профиль их не объявляет.
+Интерактивные seams (`userQuestions`, `approvals`) — через `ctx.inject()` внутри `apply`, как в telegram, если профиль их не объявляет.
 
 ### Поток сообщения (v1)
 
@@ -112,7 +114,7 @@ Config плагина: `deviceIdRef`, `loginTokenRef`, `appVersion` (default **`
 
 ## 8. Транспорт `max-account-api`
 
-- Зависимость: `file:vendor/max-account-api` (форк из reference).
+- Зависимость: `file:lib/vendor/max-account-api` (копия из `features/max-userbot/vendor/`).
 - Обязательный патч версии клиента **26.32.1** (`FORK.md` в vendor); без него — `client.unsupported-version`.
 - Reconnect: debounce **2 s** на `error`/`close` (как `MaxClientManager`).
 - Один клиент на набор кредов (v1 — одна учётка MAX на инстанс DSH).
@@ -121,8 +123,8 @@ Config плагина: `deviceIdRef`, `loginTokenRef`, `appVersion` (default **`
 
 **v1 (минимум):**
 
-- Плагин `@mikhail/dsh-max-voice` **или** расширение существующего voice-плагина: `ctx.provide('maxStt')` с контрактом как `telegramStt` (`available`, `transcribe`).
-- Config: `baseURL` Whisper (пример с инфраструктуры клиента: `http://whisper-asr:9000` или localhost tunnel).
+- Плагин `@mikhail/dsh-max-voice` **или** расширение voice-плагина: `ctx.provide('maxStt')` с контрактом как `telegramStt` (`available`, `transcribe`).
+- Config: `baseURL` Whisper (деплой-специфичный URL в `cordis.patch.yml`).
 - Если STT недоступен — ответ пользователю «голосовые не обрабатываются» (не падать весь плагин).
 
 ## 10. Конфигурация (пример)
@@ -155,23 +157,23 @@ Config плагина: `deviceIdRef`, `loginTokenRef`, `appVersion` (default **`
 
 - Старт без кредов / пустой token → fail loud, `status` файл (по аналогии telegram diagnostics).
 - Логи: `chatId`, `messageId`, `messageType`, reconnect; **не** логировать `loginToken`, URL с секретами, полные raw payload в production.
-- Метрика успеха ops: входящее → ответ без `WEB_PROVIDER_*` / без падения процесса.
+- Метрика успеха ops: входящее → ответ без падения процесса DSH.
 
 ## 13. Риски и ограничения
 
 - Userbot — реверс протокола; возможна блокировка аккаунта. Rate limit ответов, без массовых рассылок.
-- SMS-login MAX требует **RU-IP**; для dev — QR или туннель (операционно, не в git).
+- SMS-login MAX требует **RU-IP**; для dev — QR (операционно, не в git).
 - Долгие ответы LLM: typing indicator — **v2** (если API позволяет).
 
 ## 14. Тестирование
 
 | Уровень | Что |
 |---------|-----|
-| Unit | `normalizeMessage` (skip own, text/voice), `MaxClientManager` с mock `MaxClient` |
+| Unit | `normalizeMessage`, `MaxClientManager` (mock `MaxClient`); база — `features/max-userbot/__tests__` |
 | Integration | self-skip без `MAX_USERBOT_TEST_DEVICE_ID` + token в env |
 | Manual | QR-сессия → написать в MAX → ответ агента; голос → текст → ответ |
 
-Coverage: ≥ **80%** строк `lib/**` в каталоге плагина (исключая сгенерированный `vendor/**/dist` при отдельной политике).
+Coverage: ≥ **80%** строк `plugins/dsh-max-userbot/lib/**` (политика для `vendor/**/dist` — отдельно).
 
 ## 15. Критерии приёмки
 
@@ -185,16 +187,17 @@ Coverage: ≥ **80%** строк `lib/**` в каталоге плагина (и
 
 ## 16. План поставки
 
-1. Перенести `vendor`, `transport`, `normalizeMessage` в `plugins/dsh-max-userbot` (ESM, schemastery config).
+1. Порт `features/max-userbot/` → `plugins/dsh-max-userbot/lib/` (ESM, schemastery config).
 2. Каркас `apply` + минимальный `SessionRunner` (один chat → одна session).
 3. Скрипт первичного login (QR) → вывод refs для credentials file.
-4. Подключить профиль, systemd restart, manual smoke.
-5. Документы: `research.md`, `design.md` в `doc/plugins/dsh-max-userbot/`; runbook после стабилизации.
+4. Подключить профиль, restart DSH, manual smoke.
+5. `research.md`, `design.md` в `doc/plugins/dsh-max-userbot/`; runbook после стабилизации.
 6. (Следующая итерация) `dsh-max-voice` / parity с telegram media и approvals.
 
 ## 17. Связанные документы
 
+- [[repo/features/README]]
+- [[repo/features/max-userbot/README]]
 - [[repo/plugins/README]] — индекс `@mikhail/*`
 - [[repo/doc/deploy/DEPLOY_DSH_WEB]] — выкат Web + профиль
 - [[repo/doc/plugins/dsh-max-userbot/README]] — индекс doc модуля
-- Вне репозитория harness: Spyder `doc/n8n/ProfSalon/max-userbot-dsh/README.md`, `reference-code/`

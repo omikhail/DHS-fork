@@ -1,6 +1,7 @@
 CLAUDE.local.md
 .env
 node_modules/
+features/**/node_modules/
 lib/
 !plugins/**/lib/
 !plugins/**/lib/**
