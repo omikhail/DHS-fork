@@ -42,6 +42,18 @@ function dataDirectory() {
     return join(base, 'dsh-max-userbot');
 }
 
+/** @param {import('@deepseek-ai/cordis').Context} ctx */
+async function resolveCredentialRef(ctx, ref) {
+    try {
+        const resolved = await ctx.credentials.resolve(ref);
+        const value = resolved?.value;
+        return typeof value === 'string' && value !== '' ? value : undefined;
+    }
+    catch {
+        return undefined;
+    }
+}
+
 function buildModelControl(options) {
     return {
         describe: (target) => formatRoute(options.chosen(target) ?? options.fallback()),
@@ -149,14 +161,9 @@ async function start(ctx, config, logger, signal, status, secrets) {
         return;
     await status.publish('starting');
 
-    let deviceId;
-    let loginToken;
-    try {
-        deviceId = await ctx.credentials.resolve(config.deviceIdRef);
-        loginToken = await ctx.credentials.resolve(config.loginTokenRef);
-    }
-    catch (error) {
-        logger.error('[dsh-max-userbot] could not resolve MAX credentials', error);
+    const deviceId = await resolveCredentialRef(ctx, config.deviceIdRef);
+    const loginToken = await resolveCredentialRef(ctx, config.loginTokenRef);
+    if (!deviceId || !loginToken) {
         await status.publish('idle', {
             detail: `Missing credentials (${config.deviceIdRef}, ${config.loginTokenRef}). Run scripts/max-userbot-login.mjs first.`,
         });
