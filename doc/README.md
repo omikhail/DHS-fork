@@ -23,6 +23,8 @@
 
 Runbook модуля: `doc/<doc_module>/runbook.md` или `doc/<doc_module>/README.md`.
 
+Выкат Web UI (этот форк): [[repo/doc/deploy/DEPLOY_DSH_WEB]]. Ollama lease (локально): [[repo/doc/plugins/dsh-ollama-redis-lease/runbook-local]].
+
 ## Конвенции и промпты
 
 Универсальные правила: `.ai/prompts/doc_conventions.md` (субмодуль ai-skills). Ссылки между файлами в `doc/`: [[repo/doc/OBSIDIAN]].
