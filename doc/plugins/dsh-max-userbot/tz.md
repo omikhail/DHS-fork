@@ -40,6 +40,7 @@ Cordis-плагин для **DeepSeek Harness**: третий **канал об�
 - **Выход:** ответ агента → `reply` в тот же тред / `sendMessage` по `chatId`.
 - **Сессии:** привязка `chatId` (и при необходимости `fromId`) к harness session id с сохранением на диске (аналог bindings в telegram).
 - **Креды:** `deviceId` + `loginToken` только через `ctx.credentials`, не в `cordis.patch.yml` литералами.
+- **Доступ:** только номера из **`allowPhones`** (whitelist); опционально `allowFrom` по MAX id.
 - **Транспорт:** порт из `features/max-userbot/` — `MaxClientManager`, `normalizeMessage`, форк `max-account-api` **appVersion 26.32.1**.
 
 ## 4. Не в scope (v1)
@@ -49,7 +50,7 @@ Cordis-плагин для **DeepSeek Harness**: третий **канал об�
 - Полный паритет с `dsh-telegram`: streaming edit сообщений, `/sessions`, media OCR/vision, approvals и `ask_user_question` в MAX UI (отдельные задачи v2).
 - Повторное использование **той же** QR-сессии, что уже занята другим процессом (**отдельная** сессия для инстанса DSH).
 - Изменения `packages/core/agent-loop`, `packages/agents` upstream.
-- Групповые админ-команды, рассылки, спам-защита beyond простого allowlist.
+- Групповые админ-команды, рассылки, спам-защита beyond **whitelist телефонов** + опциональный `allowFrom`.
 
 ## 5. Эталоны и переиспользование
 
@@ -137,7 +138,9 @@ Config плагина: `deviceIdRef`, `loginTokenRef`, `appVersion` (default **`
     deviceIdRef: MAX_USERBOT_DEVICE_ID
     loginTokenRef: MAX_USERBOT_LOGIN_TOKEN
     appVersion: "26.32.1"
-    allowFrom: []          # пусто = все входящие (v1); иначе список fromId
+    allowPhones:           # whitelist E.164 или цифры, напр. "+79001234567"
+      - "+79001234567"
+    allowFrom: []          # опционально: доп. список MAX fromId (если телефон недоступен в contact)
     presetId: ""           # optional default agent preset
     cwd: ""                # default harness cwd
     reply:

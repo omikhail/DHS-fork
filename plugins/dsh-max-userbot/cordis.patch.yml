@@ -1,0 +1,7 @@
+# @mikhail/dsh-max-userbot — MAX userbot channel for DSH.
+- insert:
+    - id: max-userbot
+      name: '@mikhail/dsh-max-userbot'
+      inject:
+        - agents
+        - credentials

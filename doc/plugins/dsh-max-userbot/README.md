@@ -10,11 +10,13 @@
 
 - [[repo/features/max-userbot/README]] — `helpers/`, `transport/`, `vendor/max-account-api/`
 
-## Планируемые артефакты
+## Артефакты
 
-- `research.md` — риски API, сравнение с `dsh-telegram`
-- `design.md` — модули плагина, session bindings, STT
-- `runbook-local.md` — QR/login, credentials, smoke
+- [[repo/doc/plugins/dsh-max-userbot/research]] — кодовая база + доп. про команды и QR (draft)
+- [[repo/doc/plugins/dsh-max-userbot/design]] — архитектура, ADR, «одно ухо», команды, сессии
+- [[repo/doc/plugins/dsh-max-userbot/plan-mode-prompt]] — handoff в Cursor Plan Mode
+- [[repo/doc/plugins/dsh-max-userbot/runbook-local]] — QR, credentials, smoke
+- [[repo/doc/plugins/dsh-max-userbot/final-review-report]] — Phase 3 final review (v1)
 
 ## Код (после реализации)
 
