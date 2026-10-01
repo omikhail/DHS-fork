@@ -3,6 +3,9 @@
       name: '@mikhail/dsh-web-search-ollama'
       inject:
         - web
+        - credentials
       config:
         apiKeyEnv: OLLAMA_API_KEY
+        credentialRef: OLLAMA_API_KEY
+        keySource: auto
         baseURL: https://ollama.com

@@ -1,104 +1,48 @@
 # @mikhail/dsh-web-search-ollama
 
-Ollama Cloud web search провайдер для DSH. Регистрируется в `ctx.web` через `registerSearchProvider()`. Использует `POST https://ollama.com/api/web_search` с Bearer-токеном.
+Ollama Cloud web search provider for DSH (`ctx.web`). Uses `POST https://ollama.com/api/web_search` with a Bearer API key.
 
-## Установка
+With `@mikhail/dsh-ollama-redis-lease` loaded **earlier** in the profile bundles, each `search()` can acquire a key via Spyder HTTP lease (`keySource: auto`, default) instead of a static `OLLAMA_API_KEY`.
 
-### 1. Зависимость в профиле
+Design: [doc/plugins/dsh-ollama-redis-lease/web-search-lease/design.md](../../doc/plugins/dsh-ollama-redis-lease/web-search-lease/design.md).
 
-`~/.dsh/profiles/web/package.json`:
+## Profile wiring
 
-```json
-{
-  "dependencies": {
-    "@mikhail/dsh-web-search-ollama": "file:/home/mikhail/Projects/ИИ Агенты 🧠/DHS-plugins/dsh-web-search-ollama/plugin"
-  },
-  "dsh": {
-    "profile": {
-      "bundles": [
-        "@deepseek-ai/dsh-base",
-        "@deepseek-ai/dsh-web-app",
-        "@mikhail/dsh-web-search-ollama",
-        ...
-      ]
-    }
-  }
-}
-```
-
-> `@mikhail/dsh-web-search-ollama` грузится **после** `@deepseek-ai/dsh-web-app` (который владеет `ctx.web`).
-
-### 2. Конфиг в cordis.patch.yml
-
-```yaml
-- id: web-search-ollama
-  name: '@mikhail/dsh-web-search-ollama'
-  config:
-    apiKeyEnv: OLLAMA_API_KEY
-
-- id: web
-  config:
-    searchProvider: ollama
-```
-
-### 3. API-ключ
-
-Ключ Ollama в `~/.dsh/.env`:
-
-```
-OLLAMA_API_KEY=your_key_here
-```
-
-Создать ключ: https://ollama.com/settings/keys
-
-### 4. Установка
-
-```bash
-cd ~/.dsh/profiles/web
-pnpm install
-systemctl --user restart deepseek-harness.service
-```
-
-## Конфигурация
-
-| Параметр | Default | Описание |
-|----------|---------|----------|
-| `apiKey` | — | Литеральный API-ключ (prefer `apiKeyEnv`) |
-| `apiKeyEnv` | `OLLAMA_API_KEY` | Имя env-переменной для ключа |
-| `baseURL` | `https://ollama.com` | Базовый URL API |
-| `numResults` | (unset) | Количество результатов по умолчанию (макс 10) |
-
-## API
-
-Ollama Cloud: `POST /api/web_search`
+`~/.dsh/profiles/web/package.json` bundles (fragment):
 
 ```json
-// Request
-{ "query": "what is node.js", "max_results": 5 }
-
-// Response
-{ "results": [{ "title": "...", "url": "...", "content": "..." }] }
+"@mikhail/dsh-ollama-redis-lease",
+"@morlay/dsh-llm-openai-compatible",
+"@deepseek-ai/dsh-web-app",
+"@mikhail/dsh-web-search-ollama"
 ```
 
-Маппинг:
-- `url` → `WebSearchSource.url`
-- `title` → `WebSearchSource.title`
-- `content` → `WebSearchSource.snippet`
-- `publishedAt` — отсутствует (Ollama не предоставляет)
-- `content` (generated answer) — отсутствует (только сниппеты)
+Lease bundle must appear **before** this package. Web-search loads after `@deepseek-ai/dsh-web-app`.
 
-## Структура
+## Configuration
 
+| Field | Default | Description |
+|-------|---------|-------------|
+| `apiKeyEnv` | `OLLAMA_API_KEY` | Env name for static key (`keySource: env` or `auto` without lease) |
+| `credentialRef` | `OLLAMA_API_KEY` | Ref for `credentials.resolve` inside lease scope |
+| `keySource` | `auto` | `auto` \| `env` \| `lease` |
+| `baseURL` | `https://ollama.com` | API base |
+| `numResults` | (unset) | Default max results (cap 10) |
+
+### Lease-only profile
+
+- Set `OLLAMA_LEASE_TOKEN` in `~/.dsh/.env`.
+- Comment out or remove `OLLAMA_API_KEY`.
+- Ensure `@mikhail/dsh-ollama-redis-lease` is in bundles before this plugin.
+
+### Strict lease mode
+
+`keySource: lease` — requires `ollamaHttpLease` and configured lease token; warns and stays unavailable otherwise.
+
+## Tests
+
+```sh
+cd plugins/dsh-web-search-ollama
+npm install
+npm test
 ```
-plugin/
-├── package.json
-├── cordis.patch.yml
-└── lib/
-    ├── index.js       # apply(): ctx.web.registerSearchProvider()
-    ├── provider.js    # OllamaSearchProvider: available() + search()
-    └── types.js       # JSDoc wire types
-```
-
-## Fallback
-
-Если ключ пустой → `available()` возвращает `false` → seam использует другой провайдер или возвращает `WEB_PROVIDER_UNAVAILABLE`.

@@ -7,6 +7,7 @@ Out-of-tree Cordis bundles for the local harness fork. Not part of upstream `pac
 | `@mikhail/dsh-telegram` | `dsh-telegram/` | Telegram UI (fork: voice hook, session titles, `/sessions`) |
 | `@mikhail/dsh-telegram-voice` | `dsh-telegram-voice/` | Whisper STT for Telegram voice messages |
 | `@mikhail/dsh-web-search-ollama` | `dsh-web-search-ollama/` | Ollama Cloud `ctx.web` search provider |
+| `@mikhail/dsh-ollama-redis-lease` | `dsh-ollama-redis-lease/` | HTTP Ollama key lease via Spyder (`ctx.credentials` + `llm/stream`) |
 
 Operational doc index: [[repo/doc/platform/services-catalog]].
 
@@ -17,10 +18,11 @@ In `~/.dsh/profiles/web/package.json`:
 ```json
 "@mikhail/dsh-telegram": "file:/…/deepseek-harness/plugins/dsh-telegram",
 "@mikhail/dsh-telegram-voice": "file:/…/deepseek-harness/plugins/dsh-telegram-voice",
-"@mikhail/dsh-web-search-ollama": "file:/…/deepseek-harness/plugins/dsh-web-search-ollama"
+"@mikhail/dsh-web-search-ollama": "file:/…/deepseek-harness/plugins/dsh-web-search-ollama",
+"@mikhail/dsh-ollama-redis-lease": "file:/…/deepseek-harness/plugins/dsh-ollama-redis-lease"
 ```
 
-Bundle order (unchanged): `@mikhail/dsh-web-search-ollama` after `@deepseek-ai/dsh-web-app`; `@mikhail/dsh-telegram-voice` **before** `@mikhail/dsh-telegram`.
+Bundle order: `@mikhail/dsh-ollama-redis-lease` after `dsh-base` and `@morlay/dsh-llm-openai-compatible`, **before** `@mikhail/dsh-web-search-ollama`; `@mikhail/dsh-web-search-ollama` after `@deepseek-ai/dsh-web-app`; `@mikhail/dsh-telegram-voice` **before** `@mikhail/dsh-telegram`.
 
 After path changes: `cd ~/.dsh/profiles/web && pnpm install`, then restart the DSH service.
 

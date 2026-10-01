@@ -1,0 +1,19 @@
+- insert:
+    - id: ollama-redis-lease
+      name: '@mikhail/dsh-ollama-redis-lease'
+      inject:
+        - credentials
+        - llm
+      config:
+        lease:
+          baseURL: https://spyder-10.lighthouselabs.online
+          path: /api/ollama/keys/lease
+          tokenEnv: OLLAMA_LEASE_TOKEN
+          tokenHeader: X-Ollama-Lease-Token
+          timeoutMs: 30000
+          acquireRetries: 3
+          acquireRetryDelayMs: 200
+        provider:
+          credentialRef: OLLAMA_API_KEY
+          llmProviderId: ollama
+        allowStaticFallback: false

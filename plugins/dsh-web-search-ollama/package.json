@@ -1,7 +1,7 @@
 {
   "name": "@mikhail/dsh-web-search-ollama",
-  "version": "0.1.0",
-  "description": "Ollama Cloud web search provider for DSH (ctx.web)",
+  "version": "0.2.0",
+  "description": "Ollama Cloud web search provider for DSH (ctx.web), optional HTTP key lease",
   "type": "module",
   "main": "./lib/index.js",
   "exports": {
@@ -9,6 +9,10 @@
       "default": "./lib/index.js"
     },
     "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=lib/**/*.js test/*.test.js"
   },
   "dsh": {
     "bundle": {
@@ -20,6 +24,7 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-credentials": "^0.1.0-rc.8",
     "@deepseek-ai/dsh-web": "^0.1.0-rc.8",
     "@deepseek-ai/dsh-launch-environment": "^0.1.0-rc.8"
   }
