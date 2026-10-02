@@ -57,6 +57,7 @@ Bundle patch (example config):
     appVersion: "26.32.1"
     allowPhones: ["+79001234567"]
     allowFrom: []
+    cwd: /home/mikhail
     reply:
       maxChars: 4000
     voice:
